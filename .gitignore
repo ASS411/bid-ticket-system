@@ -5,6 +5,20 @@ target/
 !**/src/test/**/target/
 logs/
 
+### Node ###
+node_modules/
+dist/
+dist-ssr/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+### Local env config ###
+*-local.yml
+*-local.yaml
+*.local
+
 ### Agent ###
 cookasyncagent/
 **/dependency-reduced-pom.xml

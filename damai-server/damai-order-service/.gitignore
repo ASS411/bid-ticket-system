@@ -29,3 +29,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local env config ###
+*-local.yml
+*-local.yaml
