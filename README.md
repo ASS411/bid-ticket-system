@@ -1,99 +1,118 @@
-# 大麦高并发票务系统（DAMAI）
+# 必得网 —— 仿大麦高并发抢票系统
 
-面向高并发场景设计的分布式微服务票务系统，实现了从节目浏览、选座下单到支付、订单管理的完整业务闭环，并针对高并发、高吞吐、海量数据存储等真实生产问题给出了落地解决方案。
+面向高并发场景设计的分布式微服务票务系统，完整实现了从节目浏览、选座下单、支付回调到订单管理、延迟关单的业务闭环，并针对**抢票秒杀场景**下的高并发、高吞吐、海量数据存储等真实生产问题给出了落地解决方案。
 
 ## 项目背景
 
-本项目旨在解决传统「增删改查」型业务项目在面试与生产中的不足，提供具备高并发、高可用设计亮点的真实业务系统：
+传统「增删改查」型业务项目在应对热门演唱会门票「秒空」场景时力不从心。本项目以**高并发抢票**为核心难点，还原真实生产环境的微服务架构与中间件体系，重点解决：
 
-- 基于微服务与多种中间件，还原真实生产环境的**高并发解决方案**
-- 遵循**高内聚、低耦合**设计原则，大量使用设计模式进行架构设计
-- 覆盖**微服务、本地/分布式缓存、消息队列、搜索引擎、并发编程、本地/分布式锁、设计模式、分库分表**等核心技术
-
-## 项目介绍
-
-大麦订票服务提供在线订阅功能，支持**演唱会、话剧歌剧、体育比赛、儿童亲子**等节目类型。用户可进行注册、登录，选择节目与座位后购票、支付，并查询个人订单。
-
-难点在于热门演唱会门票的「秒空」场景。本项目不仅实现了完整购票流程，更重点解决这种**高并发抢票**问题，涵盖：
-
-- 真实生产验证的高并发、高吞吐解决方案，而非简单 demo
-- 针对实际生产问题进行的**深度定制化改造**
-- 缓存穿透、缓存击穿、缓存雪崩的真实落地解决
-- 分布式锁、本地锁的优化方案
-- 超高并发下多级缓存与数据一致性设计
-- 订单生成功能的多版本演进（逐步优化高并发处理）
-
-## 技术结构
-
-- **SpringCloud + SpringCloudAlibaba** 微服务架构
-- **Nacos** 注册中心
-- **Redis**：缓存 + `Lua 脚本` / `延迟队列` / `Stream 消息队列`高级特性
-- **Kafka** 消息中间件，**SpringBootAdmin** 服务监控
-- **ELK** 日志收集，**ElasticSearch** 搜索与展示
-- **Sentinel / Hystrix** 熔断保护
-- **ShardingSphere** 分库分表，存储海量数据
-
-通过以上设计实现高并发、高吞吐能力以及海量数据存储和服务状态监控。
-
-## 业务结构
-
-覆盖**服务配置、技术选型、核心业务、设计组件、中间件使用、监控方式、高并发解决策略**等维度，可清晰了解系统的整体架构与设计。
-
-## 技术选型
-
-| 技术                 | 说明               |
-| -------------------- | ------------------ |
-| Spring-Boot          | Web服务框架        |
-| Spring-Cloud         | 微服务框架         |
-| Spring-Cloud-alibaba | alibaba微服务框架  |
-| Spring-Cloud-Gateway | 微服务网关         |
-| Nacos                | 服务注册中心       |
-| Sentinel             | 服务熔断           |
-| Log4j2               | 日志框架           |
-| Mysql                | 数据库             |
-| MyBatis-Plus         | ORM框架            |
-| MyBatisGenerator     | 数据层代码生成器   |
-| AJ-Captcha           | 图形验证码         |
-| Kafka                | 消息队列           |
-| Redis                | 分布式缓存         |
-| Redisson             | 分布式Redis工具    |
-| Elasticsearch        | 搜索引擎           |
-| LogStash             | 日志收集工具       |
-| Kibana               | 日志可视化查看工具 |
-| Nginx                | 静态资源服务器     |
-| Docker               | 应用容器引擎       |
-| Jenkins              | 自动化部署工具     |
-| Hikari               | 数据库连接池       |
-| JWT                  | JWT登录支持        |
-| Lombok               | Java语言增强插件   |
-| Hutool               | Java工具类库       |
-| Swagger-UI           | API文档生成工具    |
-| Knife4j              | Swagger 增强框架   |
-| Hibernator-Validator | 验证框架           |
-| XXL-Job              | 分布式定时任务框架  |
-| ShardingSphere       | 分库分表           |
-
-## 架构与组件设计
-
-针对分布式微服务项目，采用 SpringBoot 自动装配机制设计组件库，并统一封装**异常处理、数据格式、多线程使用**等，遵循设计模式与高内聚低耦合原则。
+- 缓存**穿透 / 击穿 / 雪崩**的完整落地
+- 库存扣减的**原子性与不超卖**
+- 高并发下的**订单一致性、幂等与分布式事务**
+- 海量订单数据的**分库分表**与多维度查询收敛
+- 本地缓存与 Redis 的**一致性**（副本失效广播）
 
 ## 核心亮点
 
-- **用户服务**：分库分表设计、防读扩散、防缓存穿透等
-- **节目浏览**：多级缓存、缓存雪崩预防、突发流量应对
-- **购票流程**：库存缓存设计、库存扣减与回滚、分布式锁优化、幂等、缓存数据库一致性
-- **架构设计**：订单延迟关闭、分布式 id 生成、订单分库分表、灵活限流规则
+- **三级缓存体系**：Caffeine 本地缓存 + Redis + MySQL，基于 Window-TinyLFU 与「距开演时间」动态过期策略，配合布隆过滤器与分布式锁，抵御穿透与雪崩
+- **Lua 原子扣库存**：座位状态与票档余票收敛于 Redis Hash，单个 Lua 脚本完成「校验 → 扣减 → 锁座位」，杜绝超卖
+- **基因分片法**：ShardingSphere 自定义复合分片算法，将用户路由基因嵌入订单号，使 `order_number` 与 `user_id` 两个查询维度必然落于同库同表，消除跨分片聚合
+- **分布式锁框架**：注解 + 切面 + 编程式三层封装，支持可重入 / 公平 / 读写锁，锁粒度精确到业务对象
+- **Kafka 异步下单**：抢票请求削峰填谷异步化，配合幂等与延迟队列实现 5 分钟未支付自动关单
+- **多版本演进**：订单创建从同步加锁到异步削峰的多版本优化，体现逐步演进的高并发设计思路
 
-## 项目目录结构与启动
+## 技术栈
 
-后端为 Maven 多模块项目（`damai-server` 及各 framework 组件），前端为 `vue3` 目录（Vue3）。启动前需准备相应的中间件环境并完成配置。
+| 技术 | 说明 |
+| --- | --- |
+| Spring Boot 3.3.0 / Spring Cloud 2023.0.2 / Spring Cloud Alibaba 2023.0.1.0 | 微服务基础框架（JDK 17） |
+| Nacos | 服务注册与发现、配置中心 |
+| Spring Cloud Gateway | 网关路由、RSA+JWT 鉴权、滑动窗口限流 |
+| Redis / Redisson 3.32.0 | 缓存、分布式锁、延迟队列、Stream 消息、布隆过滤器 |
+| Caffeine 2.9.3 | 本地缓存（Window-TinyLFU） |
+| Kafka | 异步下单、订单消息解耦 |
+| Elasticsearch / Logstash / Kibana | 节目搜索与日志收集 |
+| ShardingSphere 5.3.2 | 分库分表、绑定表、广播表、数据加密 |
+| MyBatis-Plus / MySQL / Druid | ORM 与数据存储 |
+| Sentinel | 服务熔断降级 |
+| Spring Boot Admin / XXL-Job | 服务监控与分布式定时任务 |
+| Vue 3 + Vite | 前端订票应用 |
 
-### 后端模块
+## 系统架构
 
-- `damai-server`：核心业务服务（用户、节目、订单、支付、基础数据、自定义、网关等）
-- `damai-common`：公共工具与常量
-- 各 `*-framework`：封装的组件库（Redis、Redisson、Elasticsearch、SpringCloud、线程池、id 生成等）
+### 微服务模块（damai-server）
 
-### 前端
+| 服务 | 职责 |
+| --- | --- |
+| damai-gateway-service | 网关：路由、RSA+JWT 鉴权、限流 |
+| damai-user-service | 用户注册登录、布隆过滤器防穿透、用户信息分库分表 |
+| damai-program-service | 节目、场次、座位、票档（三级缓存 + 热点预热） |
+| damai-order-service | 订单创建（Kafka 异步）、状态流转、基因分片 |
+| damai-pay-service | 支付回调、退款（策略模式多支付渠道） |
+| damai-base-data-service / damai-customize-service | 基础数据与自定义配置 |
+| damai-admin-service | 后台管理 |
 
-- `vue3`：基于 Vue3 的订票前端
+### 组件框架（*-framework）
+
+- `damai-redisson-framework`：分布式锁（`@ServiceLock`）、延迟队列、布隆过滤器、幂等注解（`@RepeatExecuteLimit`）
+- `damai-redis-tool-framework`：Redis 封装、Redis Stream 消息广播（本地缓存失效）
+- `damai-id-generator-framework`：雪花 ID 生成（时钟回拨处理）
+- `damai-elasticsearch-framework`：ES 搜索封装
+- `damai-thread-pool-framework`：统一线程池（MDC 透传）
+- `damai-spring-cloud-framework`：服务初始化、灰度等通用组件
+
+### 目录结构
+
+```
+├── damai-server            # 核心业务服务（7 个微服务）
+├── damai-server-client     # 各服务 OpenFeign 客户端
+├── damai-common            # 公共工具与常量
+├── damai-*-framework       # 组件框架库
+├── sql/cloud/              # 数据库脚本（1 建库 + 10 业务脚本）
+└── vue3                    # 前端（Vue 3 + Vite）
+```
+
+## 快速开始
+
+### 环境依赖
+
+- JDK 17、Maven 3.8+
+- MySQL 5.7+、Redis、Kafka、Nacos、Elasticsearch
+
+### 1. 初始化数据库
+
+导入 `sql/cloud/` 下全部脚本（先执行 `1_damai_cloud_create_database.sql` 建库，再按序导入各业务脚本；订单/支付/节目/用户表为分片结构 `_0`、`_1`）。
+
+### 2. 配置中间件
+
+中间件地址与账号密码配置在**各服务的本地配置**中（如 `application-local.yml`），该文件默认不入库，需按本机环境自行创建。测试环境要点：
+
+- Redis 需设置访问密码（如 `123456`）
+- Kafka `server.properties` 中 `advertised.listeners` 需指向实际可访问地址（`PLAINTEXT://<host>:9092`），否则客户端会尝试连接 localhost
+- Nacos 注册中心地址需与各服务 `application.yml` 的 `server-addr` 一致
+
+### 3. 启动后端服务
+
+按以下顺序启动（依赖关系：先注册中心与中间件，再业务服务，最后网关与后台）：
+
+```
+base-data-service → customize-service → pay-service → user-service
+→ order-service → program-service → gateway-service → admin-service
+```
+
+网关默认端口 `6085`。
+
+### 4. 启动前端
+
+```bash
+cd vue3
+npm install
+npm run dev
+```
+
+前端通过 Vite 代理将 `/barley-dev` 前缀的请求转发至后端网关（默认 `127.0.0.1:6085`）。
+
+## 配置说明
+
+- `application.yml`（入库）：通用配置，中间件地址默认为 `127.0.0.1` 的本地环境
+- `application-local.yml` / `shardingsphere-*-local.yaml`（不入库）：本地环境配置，含中间件地址、账号密码等，clone 后需自行创建
